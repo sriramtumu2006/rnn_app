@@ -1,0 +1,6 @@
+streamlit
+numpy
+tensorflow
+onnxruntime
+matplotlib
+scikit-learn
