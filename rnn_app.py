@@ -88,7 +88,7 @@ def predict_sentiment(text):
         max_length
     )
 
-    padded = padded.astype(np.int64)
+    padded = padded.astype(np.int32)
 
     input_name = session.get_inputs()[0].name
 
