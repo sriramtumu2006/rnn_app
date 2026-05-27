@@ -67,15 +67,13 @@ def text_to_sequence(tokens):
 
 def custom_pad_sequences(sequence, maxlen):
 
-    if len(sequence) < maxlen:
+    padded = np.zeros((1, maxlen), dtype=np.int32)
 
-        sequence = sequence + [0] * (maxlen - len(sequence))
+    length = min(len(sequence), maxlen)
 
-    else:
+    padded[0, :length] = sequence[:length]
 
-        sequence = sequence[:maxlen]
-
-    return np.array([sequence])
+    return padded
 
 def predict_sentiment(text):
 
@@ -87,8 +85,6 @@ def predict_sentiment(text):
         sequence,
         max_length
     )
-
-    padded = padded.astype(np.int32)
 
     input_name = session.get_inputs()[0].name
 
