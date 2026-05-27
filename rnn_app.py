@@ -5,7 +5,6 @@ import re
 import string
 import onnxruntime as ort
 import matplotlib.pyplot as plt
-from keras.preprocessing.sequence import pad_sequences
 
 st.set_page_config(
     page_title="Mental Health Sentiment Monitoring",
@@ -50,17 +49,33 @@ def clean_text(text):
 
     return " ".join(tokens)
 
+def custom_pad_sequences(sequences, maxlen):
+
+    padded = []
+
+    for seq in sequences:
+
+        if len(seq) < maxlen:
+
+            seq = seq + [0] * (maxlen - len(seq))
+
+        else:
+
+            seq = seq[:maxlen]
+
+        padded.append(seq)
+
+    return np.array(padded)
+
 def predict_sentiment(text):
 
     cleaned_text = clean_text(text)
 
     sequence = tokenizer.texts_to_sequences([cleaned_text])
 
-    padded = pad_sequences(
+    padded = custom_pad_sequences(
         sequence,
-        maxlen=max_length,
-        padding='post',
-        truncating='post'
+        max_length
     )
 
     padded = np.array(padded, dtype=np.int64)
@@ -93,11 +108,11 @@ st.markdown("---")
 st.header("About the Project")
 
 st.write("""
-This application uses Artificial Intelligence and Natural Language Processing
-to analyze emotional sentiment from user text.
+This project uses Artificial Intelligence and Natural Language Processing
+to analyze emotional sentiment from user text messages.
 
 Emotional AI helps monitor mental wellness,
-detect emotional patterns,
+identify emotional distress,
 and support early intervention.
 
 Natural Language Processing (NLP)
@@ -142,12 +157,14 @@ if st.button("Analyze Emotion"):
 
         st.success(f"Emotion Detected: {sentiment}")
 
-        st.info(f"Confidence: {confidence * 100:.2f}%")
+        st.info(f"Confidence Score: {confidence * 100:.2f}%")
 
         if confidence > 0.80:
             status = "Strong Emotional Signal"
+
         elif confidence > 0.50:
             status = "Moderate Emotional Signal"
+
         else:
             status = "Weak Emotional Signal"
 
