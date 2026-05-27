@@ -67,7 +67,7 @@ def text_to_sequence(tokens):
 
 def custom_pad_sequences(sequence, maxlen):
 
-    padded = np.zeros((1, maxlen), dtype=np.int32)
+    padded = np.zeros((1, maxlen), dtype=np.int64)
 
     length = min(len(sequence), maxlen)
 
