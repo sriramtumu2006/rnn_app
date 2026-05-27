@@ -2,5 +2,4 @@ streamlit
 numpy
 onnxruntime
 matplotlib
-keras
 scikit-learn
