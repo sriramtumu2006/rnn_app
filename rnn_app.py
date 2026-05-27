@@ -22,7 +22,20 @@ session = ort.InferenceSession(
     providers=["CPUExecutionProvider"]
 )
 
+input_name = session.get_inputs()[0].name
+input_shape = session.get_inputs()[0].shape
+input_type = session.get_inputs()[0].type
+
+st.sidebar.write("ONNX Input Name:", input_name)
+st.sidebar.write("ONNX Input Shape:", input_shape)
+st.sidebar.write("ONNX Input Type:", input_type)
+
 max_length = 50
+
+if "int64" in input_type:
+    model_dtype = np.int64
+else:
+    model_dtype = np.int32
 
 stop_words = {
     "i","me","my","myself","we","our","ours","you","your",
@@ -67,7 +80,7 @@ def text_to_sequence(tokens):
 
 def custom_pad_sequences(sequence, maxlen):
 
-    padded = np.zeros((1, maxlen), dtype=np.int64)
+    padded = np.zeros((1, maxlen), dtype=model_dtype)
 
     length = min(len(sequence), maxlen)
 
@@ -85,8 +98,6 @@ def predict_sentiment(text):
         sequence,
         max_length
     )
-
-    input_name = session.get_inputs()[0].name
 
     prediction = session.run(
         None,
@@ -153,59 +164,61 @@ if st.button("Analyze Emotion"):
 
     else:
 
-        sentiment, confidence, probabilities = predict_sentiment(
-            user_input
-        )
+        try:
 
-        st.markdown("---")
+            sentiment, confidence, probabilities = predict_sentiment(
+                user_input
+            )
 
-        st.header("Prediction Output")
+            st.markdown("---")
 
-        st.success(f"Emotion Detected: {sentiment}")
+            st.header("Prediction Output")
 
-        st.info(f"Confidence Score: {confidence * 100:.2f}%")
+            st.success(f"Emotion Detected: {sentiment}")
 
-        if confidence > 0.80:
+            st.info(f"Confidence Score: {confidence * 100:.2f}%")
 
-            status = "Strong Emotional Signal"
+            if confidence > 0.80:
 
-        elif confidence > 0.50:
+                status = "Strong Emotional Signal"
 
-            status = "Moderate Emotional Signal"
+            elif confidence > 0.50:
 
-        else:
+                status = "Moderate Emotional Signal"
 
-            status = "Weak Emotional Signal"
+            else:
 
-        st.write(f"Emotional Status: {status}")
+                status = "Weak Emotional Signal"
 
-        st.markdown("---")
+            st.write(f"Emotional Status: {status}")
 
-        st.header("Visualization Area")
+            st.markdown("---")
 
-        labels = label_encoder.classes_
+            st.header("Visualization Area")
 
-        fig, ax = plt.subplots(figsize=(8, 4))
+            labels = label_encoder.classes_
 
-        ax.bar(labels, probabilities)
+            fig, ax = plt.subplots(figsize=(8, 4))
 
-        ax.set_xlabel("Emotion")
+            ax.bar(labels, probabilities)
 
-        ax.set_ylabel("Probability")
+            ax.set_xlabel("Emotion")
 
-        ax.set_title("Emotion Confidence Graph")
+            ax.set_ylabel("Probability")
 
-        plt.xticks(rotation=20)
+            ax.set_title("Emotion Confidence Graph")
 
-        st.pyplot(fig)
+            plt.xticks(rotation=20)
 
-        st.markdown("---")
+            st.pyplot(fig)
 
-        st.header("Emotional Guidance Area")
+            st.markdown("---")
 
-        if sentiment.lower() in ["depression", "anxiety", "sadness"]:
+            st.header("Emotional Guidance Area")
 
-            st.error("""
+            if sentiment.lower() in ["depression", "anxiety", "sadness"]:
+
+                st.error("""
 Take a short break and talk with someone you trust.
 
 Practice breathing exercises,
@@ -216,9 +229,9 @@ Remember:
 Seeking support is a sign of strength.
 """)
 
-        elif sentiment.lower() in ["normal", "happy", "positive"]:
+            elif sentiment.lower() in ["normal", "happy", "positive"]:
 
-            st.success("""
+                st.success("""
 Great to see positive emotional signals.
 
 Maintain healthy routines,
@@ -226,11 +239,15 @@ exercise regularly,
 and continue positive social interaction.
 """)
 
-        else:
+            else:
 
-            st.info("""
+                st.info("""
 Stay mindful of your emotional wellness.
 
 Good sleep, communication,
 and relaxation can improve emotional balance.
 """)
+
+        except Exception as e:
+
+            st.error(f"Prediction Error: {str(e)}")
