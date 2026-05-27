@@ -5,7 +5,7 @@ import re
 import string
 import onnxruntime as ort
 import matplotlib.pyplot as plt
-from tensorflow.keras.preprocessing.sequence import pad_sequences
+from keras.preprocessing.sequence import pad_sequences
 
 st.set_page_config(
     page_title="Mental Health Sentiment Monitoring",
@@ -63,7 +63,7 @@ def predict_sentiment(text):
         truncating='post'
     )
 
-    padded = padded.astype(np.int32)
+    padded = np.array(padded, dtype=np.int64)
 
     input_name = session.get_inputs()[0].name
 
@@ -93,25 +93,26 @@ st.markdown("---")
 st.header("About the Project")
 
 st.write("""
-This project uses Artificial Intelligence and Natural Language Processing
-to analyze emotional sentiment from user text messages.
+This application uses Artificial Intelligence and Natural Language Processing
+to analyze emotional sentiment from user text.
 
-Emotional AI helps in understanding mental wellness patterns,
-identifying emotional distress, and supporting early intervention.
+Emotional AI helps monitor mental wellness,
+detect emotional patterns,
+and support early intervention.
 
-Natural Language Processing (NLP) enables computers to understand
-human language.
+Natural Language Processing (NLP)
+allows computers to understand human language.
 
-Simple Recurrent Neural Networks (RNNs) are used for sequence learning,
-making them effective for sentiment analysis tasks.
+Simple Recurrent Neural Networks (RNNs)
+learn sequential emotional patterns from text data.
 """)
 
 st.markdown("---")
 
-st.header("Enter Your Thoughts")
+st.header("User Text Input Area")
 
 user_input = st.text_area(
-    "User Text Input",
+    "Enter your thoughts",
     placeholder="Enter your thoughts or feelings here...",
     height=180
 )
@@ -141,7 +142,7 @@ if st.button("Analyze Emotion"):
 
         st.success(f"Emotion Detected: {sentiment}")
 
-        st.info(f"Confidence Score: {confidence * 100:.2f}%")
+        st.info(f"Confidence: {confidence * 100:.2f}%")
 
         if confidence > 0.80:
             status = "Strong Emotional Signal"
@@ -154,7 +155,7 @@ if st.button("Analyze Emotion"):
 
         st.markdown("---")
 
-        st.header("Sentiment Confidence Visualization")
+        st.header("Visualization Area")
 
         labels = label_encoder.classes_
 
@@ -166,7 +167,7 @@ if st.button("Analyze Emotion"):
 
         ax.set_ylabel("Probability")
 
-        ax.set_title("Emotion Confidence Scores")
+        ax.set_title("Emotion Confidence Graph")
 
         plt.xticks(rotation=20)
 
@@ -174,17 +175,19 @@ if st.button("Analyze Emotion"):
 
         st.markdown("---")
 
-        st.header("Emotional Wellness Guidance")
+        st.header("Emotional Guidance Area")
 
-        if sentiment.lower() in ["depression", "sadness", "anxiety"]:
+        if sentiment.lower() in ["depression", "anxiety", "sadness"]:
 
             st.error("""
 Take a short break and talk with someone you trust.
 
-Practice deep breathing, hydration, and light physical activity.
+Practice breathing exercises,
+stay hydrated,
+and try light physical activity.
 
-Remember that emotional challenges are temporary,
-and seeking support is a sign of strength.
+Remember:
+Seeking support is a sign of strength.
 """)
 
         elif sentiment.lower() in ["normal", "happy", "positive"]:
@@ -192,15 +195,16 @@ and seeking support is a sign of strength.
             st.success("""
 Great to see positive emotional signals.
 
-Continue maintaining healthy routines,
-social interaction, and positive thinking habits.
+Maintain healthy routines,
+exercise regularly,
+and continue positive social interaction.
 """)
 
         else:
 
             st.info("""
-Stay mindful of your emotional well-being.
+Stay mindful of your emotional wellness.
 
-Regular sleep, exercise, and communication
-can help improve mental wellness.
+Good sleep, communication,
+and relaxation can improve emotional balance.
 """)
