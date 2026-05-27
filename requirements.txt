@@ -1,6 +1,6 @@
 streamlit
 numpy
-tensorflow
 onnxruntime
 matplotlib
+keras
 scikit-learn
