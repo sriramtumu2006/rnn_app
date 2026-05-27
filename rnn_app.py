@@ -23,19 +23,8 @@ session = ort.InferenceSession(
 )
 
 input_name = session.get_inputs()[0].name
-input_shape = session.get_inputs()[0].shape
-input_type = session.get_inputs()[0].type
-
-st.sidebar.write("ONNX Input Name:", input_name)
-st.sidebar.write("ONNX Input Shape:", input_shape)
-st.sidebar.write("ONNX Input Type:", input_type)
 
 max_length = 50
-
-if "int64" in input_type:
-    model_dtype = np.int64
-else:
-    model_dtype = np.int32
 
 stop_words = {
     "i","me","my","myself","we","our","ours","you","your",
@@ -80,7 +69,7 @@ def text_to_sequence(tokens):
 
 def custom_pad_sequences(sequence, maxlen):
 
-    padded = np.zeros((1, maxlen), dtype=model_dtype)
+    padded = np.zeros((1, maxlen), dtype=np.float32)
 
     length = min(len(sequence), maxlen)
 
