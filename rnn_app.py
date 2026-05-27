@@ -11,8 +11,8 @@ st.set_page_config(
     layout="wide"
 )
 
-with open("tokenizer.pkl", "rb") as file:
-    tokenizer = pickle.load(file)
+with open("word_index.pkl", "rb") as file:
+    word_index = pickle.load(file)
 
 with open("label_encoder.pkl", "rb") as file:
     label_encoder = pickle.load(file)
@@ -47,38 +47,48 @@ def clean_text(text):
 
     tokens = [word for word in tokens if word not in stop_words]
 
-    return " ".join(tokens)
+    return tokens
 
-def custom_pad_sequences(sequences, maxlen):
+def text_to_sequence(tokens):
 
-    padded = []
+    sequence = []
 
-    for seq in sequences:
+    for word in tokens:
 
-        if len(seq) < maxlen:
+        if word in word_index:
 
-            seq = seq + [0] * (maxlen - len(seq))
+            sequence.append(word_index[word])
 
         else:
 
-            seq = seq[:maxlen]
+            sequence.append(1)
 
-        padded.append(seq)
+    return sequence
 
-    return np.array(padded)
+def custom_pad_sequences(sequence, maxlen):
+
+    if len(sequence) < maxlen:
+
+        sequence = sequence + [0] * (maxlen - len(sequence))
+
+    else:
+
+        sequence = sequence[:maxlen]
+
+    return np.array([sequence])
 
 def predict_sentiment(text):
 
-    cleaned_text = clean_text(text)
+    cleaned_tokens = clean_text(text)
 
-    sequence = tokenizer.texts_to_sequences([cleaned_text])
+    sequence = text_to_sequence(cleaned_tokens)
 
     padded = custom_pad_sequences(
         sequence,
         max_length
     )
 
-    padded = np.array(padded, dtype=np.int64)
+    padded = padded.astype(np.int64)
 
     input_name = session.get_inputs()[0].name
 
@@ -160,12 +170,15 @@ if st.button("Analyze Emotion"):
         st.info(f"Confidence Score: {confidence * 100:.2f}%")
 
         if confidence > 0.80:
+
             status = "Strong Emotional Signal"
 
         elif confidence > 0.50:
+
             status = "Moderate Emotional Signal"
 
         else:
+
             status = "Weak Emotional Signal"
 
         st.write(f"Emotional Status: {status}")
